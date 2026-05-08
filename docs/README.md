@@ -398,7 +398,7 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 ## Support
 
-For support, contact: trading@institutionaldesk.com
+For support, contact: 
 
 ## License
 
