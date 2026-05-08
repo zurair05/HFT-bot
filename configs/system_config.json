@@ -1,0 +1,76 @@
+{
+  "system": {
+    "name": "MT5 HFT Trading Bot",
+    "version": "1.0.0",
+    "mode": "production",
+    "environment": "vps",
+    "timezone": "UTC",
+    "log_level": "INFO"
+  },
+  "mt5": {
+    "account": 0,
+    "password": "",
+    "server": "",
+    "path": "C:\\Program Files\\MetaTrader 5\\terminal64.exe",
+    "symbols": ["EURUSD", "GBPUSD", "USDJPY", "XAUUSD", "NAS100", "US30"],
+    "timeframes": ["M1", "M5", "M15", "H1"],
+    "max_tick_latency_ms": 50,
+    "execution_mode": "auto",
+    "filling_mode": "ioc"
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "db": 0,
+    "password": null,
+    "socket_timeout": 5,
+    "socket_connect_timeout": 5,
+    "health_check_interval": 30
+  },
+  "postgresql": {
+    "host": "localhost",
+    "port": 5432,
+    "database": "mt5_hft_db",
+    "username": "trading_bot",
+    "password": "",
+    "pool_size": 20,
+    "max_overflow": 10,
+    "pool_timeout": 30
+  },
+  "api": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "workers": 4,
+    "reload": false,
+    "cors_origins": ["http://localhost:3000", "http://127.0.0.1:3000"],
+    "api_key_header": "X-API-Key",
+    "rate_limit": "100/minute"
+  },
+  "websocket": {
+    "host": "0.0.0.0",
+    "port": 8001,
+    "ping_interval": 20,
+    "ping_timeout": 10,
+    "max_connections": 100
+  },
+  "ai": {
+    "model_path": "./models",
+    "prediction_interval_ms": 100,
+    "lstm_window_size": 60,
+    "confidence_threshold": 0.75,
+    "feature_engineering_enabled": true
+  },
+  "monitoring": {
+    "prometheus_port": 9090,
+    "grafana_port": 3000,
+    "alert_webhook_url": "",
+    "telegram_bot_token": "",
+    "telegram_chat_id": "",
+    "discord_webhook_url": "",
+    "email_smtp_host": "",
+    "email_smtp_port": 587,
+    "email_username": "",
+    "email_password": "",
+    "alert_email_to": ""
+  }
+}

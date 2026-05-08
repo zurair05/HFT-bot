@@ -1,0 +1,63 @@
+{
+  "ultra_fast_scalping": {
+    "enabled": true,
+    "priority": 1,
+    "symbols": ["EURUSD", "GBPUSD", "USDJPY"],
+    "timeframes": ["M1"],
+    "target_pips": 1.0,
+    "stop_loss_pips": 3.0,
+    "take_profit_pips": 2.0,
+    "max_spread_pips": 1.5,
+    "tick_momentum_threshold": 0.0001,
+    "micro_pullback_percent": 0.3,
+    "volume_threshold": 100,
+    "min_trade_duration_seconds": 5,
+    "max_trade_duration_seconds": 300
+  },
+  "order_flow": {
+    "enabled": true,
+    "priority": 2,
+    "symbols": ["EURUSD", "GBPUSD"],
+    "timeframes": ["M1", "M5"],
+    "tick_pressure_window": 50,
+    "imbalance_threshold": 0.6,
+    "aggressive_candle_multiplier": 2.0,
+    "volume_profile_enabled": true,
+    "delta_analysis_enabled": true,
+    "max_spread_pips": 2.0
+  },
+  "market_making": {
+    "enabled": false,
+    "priority": 3,
+    "symbols": ["EURUSD", "GBPUSD"],
+    "timeframes": ["M1"],
+    "spread_capture_percent": 0.5,
+    "inventory_limit_lots": 5.0,
+    "rebalance_threshold": 0.2,
+    "volatility_adjustment": true,
+    "max_position_imbalance": 2.0
+  },
+  "volatility_breakout": {
+    "enabled": true,
+    "priority": 2,
+    "symbols": ["XAUUSD", "NAS100", "US30"],
+    "timeframes": ["M15", "H1"],
+    "london_session": "07:00-10:00",
+    "ny_session": "13:00-16:00",
+    "breakout_threshold_atr": 1.5,
+    "confirm_volume_increase": true,
+    "news_volatility_mode": "disable",
+    "max_spread_pips": 5.0
+  },
+  "mean_reversion": {
+    "enabled": true,
+    "priority": 3,
+    "symbols": ["EURUSD", "GBPUSD", "USDJPY"],
+    "timeframes": ["M5", "M15"],
+    "vwap_deviation_threshold": 0.3,
+    "reversal_confirmation_candles": 3,
+    "liquidity_grab_detection": true,
+    "stop_loss_multiplier": 1.5,
+    "max_spread_pips": 3.0
+  }
+}

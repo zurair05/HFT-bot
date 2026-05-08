@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: hft_postgres
+    environment:
+      POSTGRES_DB: mt5_hft_db
+      POSTGRES_USER: trading_bot
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trading_bot_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - hft_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trading_bot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: hft_redis
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - hft_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Python Backend (FastAPI + AI/ML)
+  python-backend:
+    build:
+      context: ..
+      dockerfile: python-backend/Dockerfile
+    container_name: hft_python_backend
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=mt5_hft_db
+      - DB_USER=trading_bot
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-trading_bot_password}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - TRADING_MODE=production
+      - TRADING_ENABLED=true
+      - LOG_LEVEL=INFO
+    volumes:
+      - ../python-backend:/app
+      - ../logs:/app/logs
+      - ../models:/app/models
+      - ../data:/app/data
+      - ../configs:/app/configs
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    networks:
+      - hft_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: uvicorn app.api.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+  # Dashboard (Grafana)
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: hft_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../configs/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ../configs/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
+    networks:
+      - hft_network
+    depends_on:
+      - python-backend
+    restart: unless-stopped
+
+  # Monitoring (Prometheus)
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    container_name: hft_prometheus
+    volumes:
+      - ../configs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - hft_network
+    depends_on:
+      - python-backend
+    restart: unless-stopped
+
+  # News Filter and Calendar
+  news-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.news
+    container_name: hft_news_service
+    environment:
+      - DB_HOST=postgres
+      - REDIS_HOST=redis
+    volumes:
+      - ../configs:/app/configs
+    networks:
+      - hft_network
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
+  prometheus_data:
+
+networks:
+  hft_network:
+    driver: bridge
